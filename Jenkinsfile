@@ -1,35 +1,32 @@
 pipeline {
     agent any
     tools{
-        maven 'maven-3.9.3'
+        // maven 'maven-3.9.3'
         // dockerTool 'docker'
     }
     environment{
-        DOCKERHUB_CREDENTIALS=credentials('')
-        // BUILD_NUMBER = "${env.BUILD_NUMBER-web-app}"
+        DOCKERHUB_CREDENTIALS=credentials('e2139a57-daf7-4860-af60-38a5496dc084')
     }
 
     stages{
-            stage('Build Maven'){
+            stage('NPM install'){
                 steps{
                     checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/Neysho/angular-color.git']])
-                    sh 'mvn clean install'
+                    sh 'npm install'
                 }
             }
 
-            stage('SonarQube Analysis'){
-                //    def mvn = tool 'Default Maven';
+            stage('NPM install'){
                 steps{
-                   withSonarQubeEnv('sonar-server'){
-                   sh 'mvn sonar:sonar -Dsonar.projectKey=web-app'
-                 }
-                 }
+                    checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/Neysho/angular-color.git']])
+                    sh 'npm install'
                 }
+            }
 
              stage('Build docker image'){
                         steps{
                             script{
-                                sh 'docker build -t neysho/web-app:latest .'
+                                sh 'docker build -t neysho/web-app:$BUILD_NUMBER .'
                             }
                         }
                     }
@@ -42,7 +39,7 @@ pipeline {
              stage('Push image to Docker Hub')
              {
                 steps{
-                    sh 'docker push neysho/web-app:latest'
+                    sh 'docker push neysho/web-app:$BUILD_NUMBER'
                 }
              }
            
@@ -52,9 +49,6 @@ pipeline {
             always {
                 script {
                     sh 'docker logout'
-                    // slackSend channel: '#jenkins-alerts',  message: 'Deployment completed successfully!'
-                    slackSend channel: '#jenkins-alerts', message: 'Deployment completed successfully!',
-                     teamDomain: 'devneysho', tokenCredentialId: 'slack-alert'
                }
             }
             }
