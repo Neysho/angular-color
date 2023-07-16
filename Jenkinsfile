@@ -6,13 +6,13 @@ pipeline {
     }
     environment{
         DOCKERHUB_CREDENTIALS=credentials('')
-        // BUILD_NUMBER = "${env.BUILD_NUMBER-SPRINGBOOT-SAMPLE}"
+        // BUILD_NUMBER = "${env.BUILD_NUMBER-web-app}"
     }
 
     stages{
             stage('Build Maven'){
                 steps{
-                    checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/Neysho/springboot-sample.git']])
+                    checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/Neysho/angular-color.git']])
                     sh 'mvn clean install'
                 }
             }
@@ -21,7 +21,7 @@ pipeline {
                 //    def mvn = tool 'Default Maven';
                 steps{
                    withSonarQubeEnv('sonar-server'){
-                   sh 'mvn sonar:sonar -Dsonar.projectKey=springboot-sample'
+                   sh 'mvn sonar:sonar -Dsonar.projectKey=web-app'
                  }
                  }
                 }
@@ -29,7 +29,7 @@ pipeline {
              stage('Build docker image'){
                         steps{
                             script{
-                                sh 'docker build -t neysho/springboot-sample:latest .'
+                                sh 'docker build -t neysho/web-app:latest .'
                             }
                         }
                     }
@@ -42,7 +42,7 @@ pipeline {
              stage('Push image to Docker Hub')
              {
                 steps{
-                    sh 'docker push neysho/springboot-sample:latest'
+                    sh 'docker push neysho/web-app:latest'
                 }
              }
            
