@@ -48,29 +48,6 @@ spec:
       steps {
             container(name: 'kaniko', shell: '/busybox/sh') {
                 sh '''#!/busybox/sh
-                    echo "server {
-    listen 80;
-    root /usr/share/nginx/html;
-    index index.html;
-    server_name _;
-
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
-}" > nginx.conf
-
-                    echo "FROM node:14.21.3 AS build
-WORKDIR /app
-COPY package*.json ./
-RUN npm install
-COPY . .
-RUN npm run build
-
-FROM nginx:1.21.1-alpine
-COPY --from=build /app/dist/angular-color /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-EXPOSE 80
-CMD [\"nginx\", \"-g\", \"daemon off;\"]" > Dockerfile
 
                     /kaniko/executor --destination=neysho/web-app:latest \
                     --context=git://github.com/Neysho/angular-color.git \
